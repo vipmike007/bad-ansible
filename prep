@@ -1,0 +1,6 @@
+export GUID=`hostname | awk -F"." '{print $2}'`
+mkdir ~/.ssh
+sudo cp /root/.ssh/${GUID}key.pem ~/.ssh
+sudo chown `whoami` ~/.ssh/${GUID}key.pem
+sudo chmod 400 ~/.ssh/${GUID}key.pem
+

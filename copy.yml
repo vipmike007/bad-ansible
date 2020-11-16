@@ -1,0 +1,11 @@
+- name: deploy apache
+  hosts: localhost
+  gather_facts: false
+  become: true
+
+  tasks:
+  - name: Another symbolic mode example, adding some permissions and removing others
+
+    copy:
+      src: /etc/yum.repos.d/open_three-tier-app.repo 
+      dest: .
