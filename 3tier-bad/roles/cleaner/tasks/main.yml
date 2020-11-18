@@ -19,7 +19,6 @@
     path: /var/www/html/index.html
 
 - name: cleanup db
-  hosts: appdb1
   tasks:
     - name: remove initdb
       file:
