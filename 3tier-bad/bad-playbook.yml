@@ -14,6 +14,8 @@
 #   No use of handlers
 
 - name: configuration
+  ignore_errors: True
+
   hosts: all
   gather_facts: false # remove later! speeds up testing
   become: true
@@ -52,58 +54,37 @@
       state: restarted
 
 
-- name: deploy tomcat
+- name: deploy httpd
   hosts: apps
   gather_facts: false
   become: true
 
   tasks:
-  - name: install tomcat
+  - name: install httpd
     package:
-      name: tomcat
+      name: httpd
       state: latest
   - name: enable tomcat at boot
     service:
-      name: tomcat
+      name: httpd
       enabled: yes
 
   - name: create ansible tomcat directory
     file:
-      path: /usr/share/tomcat/webapps/ROOT
+      path: /var/www/html
       state: directory
+      mode: 0755
 
   - name: copy static index.html to tomcat webapps/ansible/index.html
     template:
       src: index.html.j2
-      dest: /usr/share/tomcat/webapps/ROOT/index.html
-      mode: 0644
+      dest: /var/www/html/index.html
+      mode: 0755
 
-  - name: start tomcat
+  - name: start httpd
     service:
-      name: tomcat
+      name: httpd
       state: started
-
-- name: index.html on app 1
-  hosts: app1
-  gather_facts: false
-  become: true
-
-  tasks:
-  - name: copy static index.html to tomcat webapps/ansible/index.html
-    template:
-      src: index.html.app1
-      dest: /usr/share/tomcat/webapps/ansible/index.html
-
-- name: index.html on app 1
-  hosts: app2
-  gather_facts: false
-  become: true
-
-  tasks:
-  - name: copy static index.html to tomcat webapps/ansible/index.html
-    template:
-      src: index.html.app2
-      dest: /usr/share/tomcat/webapps/ansible/index.html
 
 - name: deploy postgres
   hosts: apps
@@ -114,10 +95,10 @@
   - name: install progress
     command: "yum install -y postgresql-server"
 
-  #- name: install postgres
-  #  yum:
-  #    name: postgresql-server
-  #    state: latest
+  - name: install postgres
+    yum:
+      name: postgresql-server
+      state: latest
   - name: enable apache at boot
     service:
       name: postgresql
@@ -126,31 +107,13 @@
     debug:
       msg: "Either uncomment the postgres setup or manually login and initialize"
 
- # only run the next 2 tasks once!
-#  - name: initilize postgres
-#    command: postgresql-setup initdb
-#  - name: initilize postgres some more
-#    command: chkconfig postgresql on
+  - name: initilize postgres
+    ignore_errors: True
+    command: postgresql-setup initdb
+  - name: initilize postgres some more
+    ignore_errors: True
+    command: chkconfig postgresql on
   - name: start postgres
     service:
       name: postgresql.service
-      state: started
-
-- name: deploy apache
-  hosts: apps
-  gather_facts: false
-  become: true
-  hosts: apps
-  tasks:
-  - name: install apache
-    yum:
-      name: httpd
-      state: latest
-  - name: enable apache at boot
-    service:
-      name: httpd
-      enabled: yes
-  - name: start apache
-    service:
-      name: httpd
       state: started
