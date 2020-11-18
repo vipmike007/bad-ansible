@@ -19,8 +19,6 @@
     path: /var/www/html/index.html
 
 - name: cleanup db
-  tasks:
-    - name: remove initdb
-      file:
-        path:  /var/lib/pgsql/data
-        state: absent
+  file:
+    path:  /var/lib/pgsql/data
+    state: absent
