@@ -15,7 +15,7 @@
 
 - name: configuration
   hosts: all
-  gather_facts: false # remove later! speeds up testing
+  gather_facts: facts # remove later! speeds up testing
   become: true
 
   tasks:
@@ -55,58 +55,60 @@
       state: restarted
 
 
-- name: deploy tomcat
+- name: deploy httpd
   hosts: apps
   gather_facts: false
   become: true
 
   tasks:
-  - name: install tomcat
+  - name: install httpd
     package:
-      name: tomcat
+      name: httpd
       state: latest
   - name: enable tomcat at boot
     service:
-      name: tomcat
+      name: httpd
       enabled: yes
 
   - name: create ansible tomcat directory
+    ignore_errors: True
     file:
-      path: /usr/share/tomcat/webapps/ansible
+      path: /var/www/html
       state: directory
+      mode:  '0755'
 
   - name: copy static index.html to tomcat webapps/ansible/index.html
     template:
       src: index.html.j2
-      dest: /usr/share/tomcat/webapps/ansible/index.html
+      dest: /var/www/html/index.html
       mode: 0644
 
-  - name: start tomcat
+  - name: start httpd
     service:
-      name: tomcat
+      name: httpd
       state: started
 
-- name: index.html on app 1
-  hosts: app1
-  gather_facts: false
-  become: true
+      #- name: index.html on app 1
+      # hosts: app1
+      #gather_facts: false
+      #become: true
 
-  tasks:
-  - name: copy static index.html to tomcat webapps/ansible/index.html
-    template:
-      src: index.html.app1
-      dest: /usr/share/tomcat/webapps/ansible/index.html
+      #tasks:
+      #- name: copy static index.html to tomcat webapps/ansible/index.html
+      #template:
+      #src: index.html.app1
+      # dest: /usr/share/tomcat/webapps/ansible/index.html
 
-- name: index.html on app 1
-  hosts: app2
-  gather_facts: false
-  become: true
+      #- name: index.html on app 1
+      # hosts: app2
+      #gather_facts: false
+      #become: true
 
-  tasks:
-  - name: copy static index.html to tomcat webapps/ansible/index.html
-    template:
-      src: index.html.app2
-      dest: /usr/share/tomcat/webapps/ansible/index.html
+      #tasks:
+      #- name: copy static index.html to tomcat webapps/ansible/index.html
+      #template:
+      #src: index.html.app2
+      #dest: /usr/share/tomcat/webapps/ansible/index.html
 
 - name: deploy postgres
   hosts: apps
@@ -139,23 +141,4 @@
   - name: start postgres
     service:
       name: postgresql.service
-      state: started
-
-- name: deploy apache
-  hosts: apps
-  gather_facts: false
-  become: true
-  hosts: apps
-  tasks:
-  - name: install apache
-    yum:
-      name: httpd
-      state: latest
-  - name: enable apache at boot
-    service:
-      name: httpd
-      enabled: yes
-  - name: start apache
-    service:
-      name: httpd
       state: started
