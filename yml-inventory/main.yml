@@ -22,7 +22,7 @@
 
   tasks:
   - name: enable repos
-    ignore_errors: yes
+    #ignore_errors: yes
     template:
       src: ./open_three-tier-app.repo
       dest: /etc/yum.repos.d/open_three-tier-app.repo
